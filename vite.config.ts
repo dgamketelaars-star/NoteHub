@@ -15,8 +15,8 @@ export default defineConfig({
         name: 'Schrift — digitaal organizer',
         short_name: 'Schrift',
         description: 'Een rustige digitale plek voor agenda, taken, notities, ideeën, dagboek, voice memo\'s en verjaardagen.',
-        theme_color: '#f6f3ee',
-        background_color: '#f6f3ee',
+        theme_color: '#ffffff',
+        background_color: '#ffffff',
         display: 'standalone',
         start_url: '/',
         icons: [

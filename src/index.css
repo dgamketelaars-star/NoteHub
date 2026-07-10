@@ -4,33 +4,33 @@
   --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 
   /* base surfaces */
-  --color-paper: #f6f3ee;
+  --color-paper: #ffffff;
   --color-surface: #ffffff;
   --color-ink: #3a352f;
   --color-ink-muted: #8a8175;
   --color-line: #e5ddd1;
 
-  /* category colors: soft background + a deeper accent for text/icons */
-  --color-agenda-bg: #dfe7dc;
-  --color-agenda-accent: #55735a;
+  /* category colors: soft but clearly visible background + a deeper accent for text/icons */
+  --color-agenda-bg: #bcd8bd;
+  --color-agenda-accent: #3c5941;
 
-  --color-todo-bg: #dde6ec;
-  --color-todo-accent: #4c6b7f;
+  --color-todo-bg: #b7d1e0;
+  --color-todo-accent: #2e4c60;
 
-  --color-notes-bg: #efe3d3;
-  --color-notes-accent: #93693d;
+  --color-notes-bg: #e6cda0;
+  --color-notes-accent: #7a5228;
 
-  --color-ideas-bg: #e6e0ec;
-  --color-ideas-accent: #715c8e;
+  --color-ideas-bg: #d2c0e3;
+  --color-ideas-accent: #5b4573;
 
-  --color-diary-bg: #ecdfdf;
-  --color-diary-accent: #8f5658;
+  --color-diary-bg: #ddb3b6;
+  --color-diary-accent: #723e40;
 
-  --color-voice-bg: #efe6cf;
-  --color-voice-accent: #93741f;
+  --color-voice-bg: #ddc47e;
+  --color-voice-accent: #6b5416;
 
-  --color-birthdays-bg: #f0ddd3;
-  --color-birthdays-accent: #a86645;
+  --color-birthdays-bg: #e2ab88;
+  --color-birthdays-accent: #8a4f30;
 }
 
 html, body, #root {
