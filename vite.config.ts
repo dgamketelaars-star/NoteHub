@@ -3,9 +3,9 @@ import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import { VitePWA } from 'vite-plugin-pwa'
 
-// GitHub Pages project site is served from /schrift/, so all asset URLs
-// need that prefix baked in at build time.
-const base = '/schrift/'
+// GitHub Pages project site is served from /NoteHub/ (must match the GitHub
+// repo name exactly), so all asset URLs need that prefix baked in at build time.
+const base = '/NoteHub/'
 
 // https://vite.dev/config/
 export default defineConfig({
