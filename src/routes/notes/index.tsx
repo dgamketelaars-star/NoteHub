@@ -9,6 +9,7 @@ const config: NotebookConfig = {
   accentVar: '--color-notes-accent',
   emptyText: 'Nog geen notities. Tik op ‘Nieuwe notitie’ om te beginnen.',
   newLabel: 'Nieuwe notitie',
+  attachmentOwnerType: 'note',
 };
 
 export function NotesList() {

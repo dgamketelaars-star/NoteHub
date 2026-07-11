@@ -49,6 +49,7 @@ export function BirthdaysList() {
           <li key={b.id}>
             <Link
               to={`/verjaardagen/${b.id}`}
+              replace
               className="flex items-center justify-between gap-3 rounded-2xl bg-white p-4 shadow-sm active:scale-[0.99]"
             >
               <span>

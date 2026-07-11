@@ -1,6 +1,6 @@
 import { db } from '../db';
 
-const EXPORT_VERSION = 1;
+const EXPORT_VERSION = 2;
 
 function blobToBase64(blob: Blob): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -19,20 +19,23 @@ function base64ToBlob(base64: string, mimeType: string): Blob {
 }
 
 export async function exportAllData(): Promise<Blob> {
-  const [agendaItems, todos, notes, ideas, diaryEntries, voiceMemos, birthdays] = await Promise.all([
+  const [agendaItems, todos, notes, ideas, diaryEntries, birthdays, attachments] = await Promise.all([
     db.agendaItems.toArray(),
     db.todos.toArray(),
     db.notes.toArray(),
     db.ideas.toArray(),
     db.diaryEntries.toArray(),
-    db.voiceMemos.toArray(),
     db.birthdays.toArray(),
+    db.attachments.toArray(),
   ]);
 
-  const voiceMemosEncoded = await Promise.all(
-    voiceMemos.map(async (memo) => ({
-      ...memo,
-      blob: await blobToBase64(memo.blob),
+  // Attachments carry a Blob, which JSON can't represent directly, so they're
+  // base64-encoded here — this keeps the export a single, complete backup
+  // file instead of silently dropping attached files.
+  const attachmentsEncoded = await Promise.all(
+    attachments.map(async (a) => ({
+      ...a,
+      blob: await blobToBase64(a.blob),
     })),
   );
 
@@ -44,8 +47,8 @@ export async function exportAllData(): Promise<Blob> {
     notes,
     ideas,
     diaryEntries,
-    voiceMemos: voiceMemosEncoded,
     birthdays,
+    attachments: attachmentsEncoded,
   };
 
   return new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
@@ -61,9 +64,14 @@ export async function importAllData(file: File): Promise<{ imported: number }> {
 
   let imported = 0;
 
+  // Older exports (exportVersion 1) may include a "voiceMemos" array from the
+  // since-removed Voice memo's feature. It's intentionally ignored here: that
+  // table no longer exists, and skipping it lets the rest of an old backup
+  // still import cleanly instead of failing outright.
+
   await db.transaction(
     'rw',
-    [db.agendaItems, db.todos, db.notes, db.ideas, db.diaryEntries, db.voiceMemos, db.birthdays],
+    [db.agendaItems, db.todos, db.notes, db.ideas, db.diaryEntries, db.birthdays, db.attachments],
     async () => {
       for (const item of data.agendaItems ?? []) {
         const { id: _id, ...rest } = item;
@@ -90,14 +98,14 @@ export async function importAllData(file: File): Promise<{ imported: number }> {
         await db.diaryEntries.add(rest);
         imported++;
       }
-      for (const item of data.voiceMemos ?? []) {
-        const { id: _id, blob, ...rest } = item;
-        await db.voiceMemos.add({ ...rest, blob: base64ToBlob(blob, rest.mimeType) });
-        imported++;
-      }
       for (const item of data.birthdays ?? []) {
         const { id: _id, ...rest } = item;
         await db.birthdays.add(rest);
+        imported++;
+      }
+      for (const item of data.attachments ?? []) {
+        const { id: _id, blob, ...rest } = item;
+        await db.attachments.add({ ...rest, blob: base64ToBlob(blob, rest.mimeType) });
         imported++;
       }
     },

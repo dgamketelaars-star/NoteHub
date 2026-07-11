@@ -1,7 +1,7 @@
 # Schrift — digitale organizer (V1)
 
-Eén rustige plek voor agenda, taken, notities, ideeën, dagboek, voice memo's
-en verjaardagen. Mobile-first, installeerbaar als PWA, werkt offline en
+Eén rustige plek voor agenda, taken, notities, ideeën, dagboek en
+verjaardagen. Mobile-first, installeerbaar als PWA, werkt offline en
 bewaart alles lokaal op je apparaat.
 
 ## Starten
@@ -34,16 +34,31 @@ mobiele browser en kies "Toevoegen aan startscherm" / "App installeren".
 - **Tailwind CSS v4** — voor consistente, snel te onderhouden styling zonder
   een eigen CSS-architectuur te hoeven optuigen.
 - **Dexie (IndexedDB)** als lokale opslag, met `dexie-react-hooks` voor live
-  queries. IndexedDB kan, in tegenstelling tot `localStorage`, ook audio
-  (voice memo's) opslaan en blijft geschikt als de app groter wordt.
-  De databasestructuur (`src/db.ts`) is opgezet in aparte tabellen per
-  categorie, zodat een latere overstap naar cloudsync (bijv. een sync-laag
-  bovenop dezelfde tabellen) geen herontwerp vergt.
+  queries. IndexedDB kan, in tegenstelling tot `localStorage`, ook grote
+  binaire bestanden (bijlagen bij notities en taken) opslaan zonder ze als
+  base64 door een tekstuele opslaglaag te hoeven persen, en blijft geschikt
+  als de app groter wordt. De databasestructuur (`src/db.ts`) is opgezet in
+  aparte tabellen per categorie, zodat een latere overstap naar cloudsync
+  (bijv. een sync-laag bovenop dezelfde tabellen) geen herontwerp vergt.
+  Schema-wijzigingen lopen via Dexie's versienummering (`db.version(n)`), dat
+  bestaande gegevens bij een update automatisch en veilig migreert.
+- **Bijlagen** (notities en taken) staan in een eigen `attachments`-tabel als
+  ruwe `Blob`, gekoppeld via `ownerType`+`ownerId` aan de notitie/taak. Zo
+  hoort een bijlage bij precies één item, zonder aparte bestandsbibliotheek
+  of mappenstructuur. Afbeeldingen krijgen een thumbnail-preview; andere
+  bestanden tonen bestandsnaam + grootte en zijn direct te openen/downloaden.
 - **HashRouter** (react-router) in plaats van BrowserRouter — zo werkt de
   app als statische bestanden overal, zonder dat een server
   deep links naar `index.html` hoeft door te sturen. Belangrijk voor een
   PWA die ook vanaf een simpele static host of `file://`-achtige omgeving
   moet kunnen draaien.
+- **Navigatiemodel: elke hoofdcategorie is één history-entry.** Overgangen
+  ván Home náár een categorie gebruiken een normale push; alle navigatie
+  dáárbinnen (lijst ↔ nieuw/bewerken/detail, opslaan, verwijderen) gebruikt
+  `replace` in plaats van `push`. Zo bouwt de browser-historystack nooit op
+  met tussenliggende CRUD- of formulierstates, en brengt zowel de systeem-
+  back-knop als de terugknop in de app je vanuit elke stand binnen een
+  categorie in één stap terug naar het homescreen.
 - **vite-plugin-pwa** genereert de service worker en het manifest; offline
   gebruik werkt na de eerste keer laden.
 - **Agenda-tekstherkenning** (`src/lib/agendaParser.ts`) is een eigen,
@@ -69,8 +84,8 @@ src/
     agenda/              lijst, nieuw (met NL-parser + bevestiging), detail
     todo/
     notes/, ideas/       delen één generieke "notebook"-component
+                         (notities ondersteunen bijlagen, ideeën niet)
     diary/
-    voice/               opname via MediaRecorder
     birthdays/
     settings/            JSON-export/import
 ```
@@ -86,9 +101,10 @@ src/
   melding stuurt — browsers staan dat alleen toe met extra
   toestemmingen/service-worker-logica die bewust buiten V1 is gehouden.
   De reminder-keuze is dus voorbereid, maar (nog) niet actief.
-- Voice memo's vereisen microfoon-toegang via de browser
-  (`getUserMedia`/`MediaRecorder`); als een browser dat niet ondersteunt,
-  toont de app dat duidelijk zonder de rest van de app te blokkeren.
+- Bijlagen tellen mee in de opslagquota van de browser (IndexedDB). Bij
+  zeer grote of veel bestanden kan een browser om extra opslagtoestemming
+  vragen of, in zeldzame gevallen, opslag weigeren; er is geen kunstmatige
+  bestandsgroottelimiet ingebouwd.
 - Taken kunnen na aanmaken niet meer tussen Vandaag/Deze week/Tijdloos
   verplaatst worden (wel bewerken, afvinken, verwijderen) — dit stond niet
   expliciet in de opdracht en is bewust weggelaten om de scope klein te
@@ -98,3 +114,7 @@ src/
 - Gegevens leven in de IndexedDB van de browser op dit apparaat. Wissen
   van browsergegevens verwijdert ook de organizer-data; gebruik de
   JSON-export als back-up.
+- De JSON-export is een volledige back-up, inclusief bijlagen (base64-
+  gecodeerd). Dat maakt het exportbestand merkbaar groter naarmate er meer
+  of grotere bijlagen zijn — een bewuste keuze, zodat "exporteren" ook
+  echt alles meeneemt in plaats van bijlagen stilzwijgend over te slaan.

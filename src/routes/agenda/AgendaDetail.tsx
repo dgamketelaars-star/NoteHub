@@ -51,13 +51,13 @@ export function AgendaDetail() {
       time: time || null,
       reminder,
     });
-    navigate('/agenda');
+    navigate('/agenda', { replace: true });
   }
 
   async function handleDelete() {
     if (!confirm('Deze afspraak verwijderen?')) return;
     await db.agendaItems.delete(Number(id));
-    navigate('/agenda');
+    navigate('/agenda', { replace: true });
   }
 
   return (

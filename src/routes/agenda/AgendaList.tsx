@@ -45,6 +45,7 @@ export function AgendaList() {
               )}
               <Link
                 to={`/agenda/${item.id}`}
+                replace
                 className="flex items-center justify-between gap-3 rounded-2xl bg-white p-4 shadow-sm active:scale-[0.99]"
               >
                 <span className="font-medium text-(--color-ink)">{item.title}</span>
@@ -70,6 +71,7 @@ export function AgendaList() {
                 <li key={item.id}>
                   <Link
                     to={`/agenda/${item.id}`}
+                    replace
                     className="flex items-center justify-between gap-3 rounded-2xl bg-white p-4 shadow-sm active:scale-[0.99]"
                   >
                     <span>

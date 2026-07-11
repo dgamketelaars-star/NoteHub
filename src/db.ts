@@ -2,6 +2,7 @@ import Dexie, { type EntityTable } from 'dexie';
 
 export type ReminderOption = 'none' | '1h' | 'evening' | 'both';
 export type TodoBucket = 'today' | 'week' | 'anytime';
+export type AttachmentOwnerType = 'note' | 'todo';
 
 export interface AgendaItem {
   id: number;
@@ -43,15 +44,6 @@ export interface DiaryEntry {
   createdAt: string;
 }
 
-export interface VoiceMemo {
-  id: number;
-  name: string;
-  blob: Blob;
-  mimeType: string;
-  duration: number; // seconds
-  createdAt: string;
-}
-
 export interface Birthday {
   id: number;
   name: string;
@@ -62,16 +54,30 @@ export interface Birthday {
   createdAt: string;
 }
 
+export interface Attachment {
+  id: number;
+  ownerType: AttachmentOwnerType;
+  ownerId: number; // id of the owning note or todo
+  name: string;
+  mimeType: string;
+  size: number;
+  blob: Blob;
+  createdAt: string;
+}
+
 const db = new Dexie('schrift-organizer') as Dexie & {
   agendaItems: EntityTable<AgendaItem, 'id'>;
   todos: EntityTable<Todo, 'id'>;
   notes: EntityTable<Note, 'id'>;
   ideas: EntityTable<Idea, 'id'>;
   diaryEntries: EntityTable<DiaryEntry, 'id'>;
-  voiceMemos: EntityTable<VoiceMemo, 'id'>;
   birthdays: EntityTable<Birthday, 'id'>;
+  attachments: EntityTable<Attachment, 'id'>;
 };
 
+// v1: original schema, including the since-removed voice memo's feature.
+// Kept as-is (not rewritten) so upgrades from existing installs replay
+// correctly — Dexie schema history must never be edited retroactively.
 db.version(1).stores({
   agendaItems: '++id, date',
   todos: '++id, bucket, done',
@@ -80,6 +86,12 @@ db.version(1).stores({
   diaryEntries: '++id, date',
   voiceMemos: '++id, createdAt',
   birthdays: '++id, date',
+});
+
+// v2: Voice memo's feature removed; attachments (for notes/todos) added.
+db.version(2).stores({
+  voiceMemos: null,
+  attachments: '++id, [ownerType+ownerId]',
 });
 
 export { db };

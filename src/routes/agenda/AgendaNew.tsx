@@ -38,7 +38,7 @@ export function AgendaNew() {
       reminder,
       createdAt: new Date().toISOString(),
     } as never);
-    navigate('/agenda');
+    navigate('/agenda', { replace: true });
   }
 
   return (

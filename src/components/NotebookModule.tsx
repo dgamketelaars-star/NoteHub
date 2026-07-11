@@ -6,7 +6,9 @@ import { Page } from './Page';
 import { PageHeader } from './PageHeader';
 import { EmptyState } from './EmptyState';
 import { Fab } from './Fab';
+import { AttachmentCountBadge, AttachmentField } from './AttachmentField';
 import { SearchIcon, TrashIcon } from './icons';
+import { removeAttachmentsForOwner, type AttachmentOwnerType } from '../lib/attachments';
 
 interface NotebookEntry {
   id: number;
@@ -24,6 +26,8 @@ export interface NotebookConfig {
   accentVar: string; // e.g. "--color-notes-accent"
   emptyText: string;
   newLabel: string;
+  /** When set, entries of this type can carry file attachments (e.g. notes, but not ideas). */
+  attachmentOwnerType?: AttachmentOwnerType;
 }
 
 function formatDate(iso: string) {
@@ -67,11 +71,17 @@ export function NotebookList(config: NotebookConfig) {
           <li key={entry.id}>
             <Link
               to={`${config.basePath}/${entry.id}`}
+              replace
               className="block w-full rounded-2xl bg-white p-4 text-left shadow-sm active:scale-[0.99]"
             >
               <p className="font-medium text-(--color-ink)">{entry.title || '(zonder titel)'}</p>
               {entry.body && <p className="mt-1 line-clamp-2 text-sm text-(--color-ink-muted)">{entry.body}</p>}
-              <p className="mt-2 text-xs text-(--color-ink-muted)">{formatDate(entry.updatedAt)}</p>
+              <div className="mt-2 flex items-center justify-between">
+                <p className="text-xs text-(--color-ink-muted)">{formatDate(entry.updatedAt)}</p>
+                {config.attachmentOwnerType && (
+                  <AttachmentCountBadge ownerType={config.attachmentOwnerType} ownerId={entry.id} />
+                )}
+              </div>
             </Link>
           </li>
         ))}
@@ -101,30 +111,34 @@ export function NotebookEditor(config: NotebookConfig) {
     setLoaded(true);
   }
 
-  async function persist() {
+  async function persist(force = false): Promise<number | undefined> {
     const now = new Date().toISOString();
     if (entryId === undefined) {
-      if (!title.trim() && !body.trim()) return;
+      if (!force && !title.trim() && !body.trim()) return undefined;
       const newId = await config.table.add({ title: title.trim(), body, createdAt: now, updatedAt: now } as never);
       setEntryId(newId as number);
-    } else {
-      await config.table.update(entryId, { title: title.trim(), body, updatedAt: now });
+      return newId as number;
     }
+    await config.table.update(entryId, { title: title.trim(), body, updatedAt: now });
+    return entryId;
   }
 
   async function handleDone() {
     await persist();
-    navigate(config.basePath);
+    navigate(config.basePath, { replace: true });
   }
 
   async function handleDelete() {
     if (entryId === undefined) {
-      navigate(config.basePath);
+      navigate(config.basePath, { replace: true });
       return;
     }
     if (!confirm('Verwijderen?')) return;
     await config.table.delete(entryId);
-    navigate(config.basePath);
+    if (config.attachmentOwnerType) {
+      await removeAttachmentsForOwner(config.attachmentOwnerType, entryId);
+    }
+    navigate(config.basePath, { replace: true });
   }
 
   return (
@@ -163,6 +177,19 @@ export function NotebookEditor(config: NotebookConfig) {
           rows={10}
           className="rounded-2xl border border-(--color-line) bg-white p-4 text-base outline-none"
         />
+
+        {config.attachmentOwnerType && (
+          <div className="flex flex-col gap-2">
+            <span className="text-sm font-medium text-(--color-ink-muted)">Bijlagen</span>
+            <AttachmentField
+              ownerType={config.attachmentOwnerType}
+              ownerId={entryId}
+              ensureOwnerId={() => persist(true)}
+              accentVar={config.accentVar}
+            />
+          </div>
+        )}
+
         <button
           type="button"
           onClick={handleDone}

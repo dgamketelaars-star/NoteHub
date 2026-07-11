@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Page } from '../components/Page';
 import { CategoryTile } from '../components/CategoryTile';
-import { CalendarIcon, CheckIcon, NoteIcon, BulbIcon, BookIcon, MicIcon, CakeIcon, SettingsIcon } from '../components/icons';
+import { CalendarIcon, CheckIcon, NoteIcon, BulbIcon, BookIcon, CakeIcon, SettingsIcon } from '../components/icons';
 
 export function Home() {
   return (
@@ -29,7 +29,6 @@ export function Home() {
         <CategoryTile to="/notities" label="Notities" bgVar="--color-notes-bg" accentVar="--color-notes-accent" icon={<NoteIcon />} />
         <CategoryTile to="/ideeen" label="Ideeën" bgVar="--color-ideas-bg" accentVar="--color-ideas-accent" icon={<BulbIcon />} />
         <CategoryTile to="/dagboek" label="Dagboek" bgVar="--color-diary-bg" accentVar="--color-diary-accent" icon={<BookIcon />} />
-        <CategoryTile to="/voice-memos" label="Voice memo's" bgVar="--color-voice-bg" accentVar="--color-voice-accent" icon={<MicIcon />} />
         <CategoryTile to="/verjaardagen" label="Verjaardagen" bgVar="--color-birthdays-bg" accentVar="--color-birthdays-accent" icon={<CakeIcon />} />
       </div>
     </Page>

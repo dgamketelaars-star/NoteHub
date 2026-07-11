@@ -45,13 +45,13 @@ export function BirthdayEditor() {
     } else {
       await db.birthdays.update(Number(id), { name: name.trim(), date, yearUnknown, note: note.trim(), reminder });
     }
-    navigate('/verjaardagen');
+    navigate('/verjaardagen', { replace: true });
   }
 
   async function handleDelete() {
     if (!confirm('Deze verjaardag verwijderen?')) return;
     await db.birthdays.delete(Number(id));
-    navigate('/verjaardagen');
+    navigate('/verjaardagen', { replace: true });
   }
 
   return (

@@ -59,16 +59,6 @@ export function BookIcon() {
   );
 }
 
-export function MicIcon() {
-  return (
-    <svg {...base}>
-      <rect x="9" y="3" width="6" height="11" rx="3" />
-      <path d="M5.5 11a6.5 6.5 0 0 0 13 0" />
-      <path d="M12 17.5V21M9 21h6" />
-    </svg>
-  );
-}
-
 export function CakeIcon() {
   return (
     <svg {...base}>
@@ -113,6 +103,23 @@ export function SearchIcon() {
     <svg {...base} width={20} height={20}>
       <circle cx="10.5" cy="10.5" r="6.5" />
       <path d="M20 20l-4.8-4.8" />
+    </svg>
+  );
+}
+
+export function PaperclipIcon() {
+  return (
+    <svg {...base} width={18} height={18}>
+      <path d="M16.5 6.5l-7.6 7.6a3 3 0 0 0 4.24 4.24l8.13-8.13a5 5 0 0 0-7.07-7.07L6 10.34a7 7 0 0 0 9.9 9.9" />
+    </svg>
+  );
+}
+
+export function FileIcon() {
+  return (
+    <svg {...base} width={18} height={18}>
+      <path d="M6 3.5h9l3.5 3.5V20a.5.5 0 0 1-.5.5H6a.5.5 0 0 1-.5-.5V4a.5.5 0 0 1 .5-.5z" />
+      <path d="M14.5 3.5V7a.5.5 0 0 0 .5.5h3.5" />
     </svg>
   );
 }

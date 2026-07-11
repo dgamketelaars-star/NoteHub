@@ -4,7 +4,9 @@ import { db, type Todo, type TodoBucket } from '../../db';
 import { Page } from '../../components/Page';
 import { PageHeader } from '../../components/PageHeader';
 import { EmptyState } from '../../components/EmptyState';
-import { TrashIcon } from '../../components/icons';
+import { AttachmentField } from '../../components/AttachmentField';
+import { PaperclipIcon, TrashIcon } from '../../components/icons';
+import { removeAttachmentsForOwner } from '../../lib/attachments';
 
 const BUCKETS: { value: TodoBucket; label: string }[] = [
   { value: 'today', label: 'Vandaag' },
@@ -15,6 +17,11 @@ const BUCKETS: { value: TodoBucket; label: string }[] = [
 function TodoRow({ todo }: { todo: Todo }) {
   const [editing, setEditing] = useState(false);
   const [text, setText] = useState(todo.text);
+  const [showAttachments, setShowAttachments] = useState(false);
+  const attachmentCount = useLiveQuery(
+    () => db.attachments.where('[ownerType+ownerId]').equals(['todo', todo.id]).count(),
+    [todo.id],
+  );
 
   async function toggle() {
     await db.todos.update(todo.id, { done: !todo.done });
@@ -33,52 +40,78 @@ function TodoRow({ todo }: { todo: Todo }) {
   async function remove() {
     if (!confirm('Deze taak verwijderen?')) return;
     await db.todos.delete(todo.id);
+    await removeAttachmentsForOwner('todo', todo.id);
   }
 
   return (
-    <li className="flex items-center gap-3 rounded-2xl bg-white p-4 shadow-sm">
-      <button
-        type="button"
-        onClick={toggle}
-        aria-label={todo.done ? 'Markeer als niet klaar' : 'Markeer als klaar'}
-        className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full border-2 ${
-          todo.done ? 'border-(--color-todo-accent) bg-(--color-todo-accent)' : 'border-(--color-line)'
-        }`}
-      >
-        {todo.done && (
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round">
-            <path d="M4 12.5l5 5L20 6" />
-          </svg>
-        )}
-      </button>
-
-      {editing ? (
-        <input
-          autoFocus
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          onBlur={saveEdit}
-          onKeyDown={(e) => e.key === 'Enter' && saveEdit()}
-          className="flex-1 rounded-xl border border-(--color-line) px-2 py-1 text-base outline-none"
-        />
-      ) : (
+    <li className="rounded-2xl bg-white shadow-sm">
+      <div className="flex items-center gap-3 p-4">
         <button
           type="button"
-          onClick={() => setEditing(true)}
-          className={`flex-1 text-left text-base ${todo.done ? 'text-(--color-ink-muted) line-through' : 'text-(--color-ink)'}`}
+          onClick={toggle}
+          aria-label={todo.done ? 'Markeer als niet klaar' : 'Markeer als klaar'}
+          className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full border-2 ${
+            todo.done ? 'border-(--color-todo-accent) bg-(--color-todo-accent)' : 'border-(--color-line)'
+          }`}
         >
-          {todo.text}
+          {todo.done && (
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round">
+              <path d="M4 12.5l5 5L20 6" />
+            </svg>
+          )}
         </button>
-      )}
 
-      <button
-        type="button"
-        onClick={remove}
-        aria-label="Verwijderen"
-        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-(--color-ink-muted)"
-      >
-        <TrashIcon />
-      </button>
+        {editing ? (
+          <input
+            autoFocus
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            onBlur={saveEdit}
+            onKeyDown={(e) => e.key === 'Enter' && saveEdit()}
+            className="flex-1 rounded-xl border border-(--color-line) px-2 py-1 text-base outline-none"
+          />
+        ) : (
+          <button
+            type="button"
+            onClick={() => setEditing(true)}
+            className={`flex-1 text-left text-base ${todo.done ? 'text-(--color-ink-muted) line-through' : 'text-(--color-ink)'}`}
+          >
+            {todo.text}
+          </button>
+        )}
+
+        <button
+          type="button"
+          onClick={() => setShowAttachments((v) => !v)}
+          aria-label="Bijlagen"
+          className={`flex h-9 items-center gap-1 rounded-full px-2 ${
+            attachmentCount ? 'text-(--color-todo-accent)' : 'text-(--color-ink-muted)'
+          }`}
+        >
+          <PaperclipIcon />
+          {!!attachmentCount && <span className="text-xs font-medium">{attachmentCount}</span>}
+        </button>
+
+        <button
+          type="button"
+          onClick={remove}
+          aria-label="Verwijderen"
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-(--color-ink-muted)"
+        >
+          <TrashIcon />
+        </button>
+      </div>
+
+      {showAttachments && (
+        <div className="border-t border-(--color-line) p-4 pt-3">
+          <AttachmentField
+            ownerType="todo"
+            ownerId={todo.id}
+            ensureOwnerId={async () => todo.id}
+            accentVar="--color-todo-accent"
+          />
+        </div>
+      )}
     </li>
   );
 }
