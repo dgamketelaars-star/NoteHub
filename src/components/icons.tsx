@@ -123,3 +123,13 @@ export function FileIcon() {
     </svg>
   );
 }
+
+export function InfoIcon() {
+  return (
+    <svg {...base} width={20} height={20}>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 11v5.5" />
+      <circle cx="12" cy="7.8" r="0.9" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}

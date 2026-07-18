@@ -26,11 +26,12 @@
   --color-diary-bg: #ddb3b6;
   --color-diary-accent: #723e40;
 
-  --color-voice-bg: #ddc47e;
-  --color-voice-accent: #6b5416;
-
   --color-birthdays-bg: #e2ab88;
   --color-birthdays-accent: #8a4f30;
+
+  /* soft notice/tip callout, used on the settings page */
+  --color-notice-bg: #f3ead2;
+  --color-notice-accent: #8a6a2f;
 }
 
 html, body, #root {

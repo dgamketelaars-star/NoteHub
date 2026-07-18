@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react';
 import { Page } from '../../components/Page';
 import { PageHeader } from '../../components/PageHeader';
+import { InfoIcon } from '../../components/icons';
 import { exportAllData, importAllData } from '../../lib/exportImport';
 
 export function SettingsPage() {
@@ -45,6 +46,19 @@ export function SettingsPage() {
     <Page>
       <PageHeader title="Instellingen" />
 
+      <div
+        className="mb-4 flex items-start gap-3 rounded-2xl p-4"
+        style={{ backgroundColor: 'var(--color-notice-bg)' }}
+      >
+        <span className="mt-0.5 shrink-0" style={{ color: 'var(--color-notice-accent)' }}>
+          <InfoIcon />
+        </span>
+        <p className="text-sm" style={{ color: 'var(--color-notice-accent)' }}>
+          Je gegevens staan alleen lokaal op dit toestel. Exporteer af en toe een back-up hieronder, zodat je niets
+          kwijtraakt als je dit toestel wisselt, de app opnieuw installeert of browsergegevens wist.
+        </p>
+      </div>
+
       <section className="flex flex-col gap-3 rounded-2xl bg-white p-4 shadow-sm">
         <h2 className="font-medium text-(--color-ink)">Gegevens exporteren</h2>
         <p className="text-sm text-(--color-ink-muted)">
@@ -87,10 +101,6 @@ export function SettingsPage() {
       </section>
 
       {status && <p className="mt-4 text-center text-sm text-(--color-ink-muted)">{status}</p>}
-
-      <p className="mt-8 text-center text-xs text-(--color-ink-muted)">
-        Alle gegevens staan lokaal op dit apparaat opgeslagen.
-      </p>
     </Page>
   );
 }
